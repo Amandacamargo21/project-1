@@ -13,6 +13,7 @@ class Home extends Component {
     allPosts: [],
     page: 0,
     postsPerPage: 10,
+    searchValue: '',
   }
 
   async componentDidMount() {
@@ -37,19 +38,41 @@ class Home extends Component {
     this.setState({ posts, page: nextPage })
   }
 
+  handleChange = (e) => {
+    const { value } = e.target
+    this.setState({ searchValue: value })
+  }
+
   render() {
-    const { posts, page, postsPerPage, allPosts } = this.state
+    const { posts, page, postsPerPage, allPosts, searchValue } = this.state
     const noMorePosts = page + postsPerPage >= allPosts.length
+
+    const filteredPosts = !!searchValue
+      ? allPosts.filter((post) => {
+          return post.title.toLowerCase().includes(searchValue.toLowerCase())
+        })
+      : posts
 
     return (
       <section className="container">
-        <Posts posts={posts} />
+        {!!searchValue && (
+          <>
+            <h1>Search value: {searchValue}</h1>
+          </>
+        )}
+        <br /> <br />
+        <input onChange={this.handleChange} value={searchValue} type="search" />
+        <br /> <br /> <br />
+        {filteredPosts.length > 0 && <Posts posts={filteredPosts} />}
+        {filteredPosts.length === 0 && <p>Não existem posts =(</p>}
         <div className="button-container">
-          <Button
-            disabled={noMorePosts}
-            text="Load more posts"
-            onClick={this.loadMorePosts}
-          />
+          {!searchValue && (
+            <Button
+              disabled={noMorePosts}
+              text="Load more posts"
+              onClick={this.loadMorePosts}
+            />
+          )}
         </div>
       </section>
     )
